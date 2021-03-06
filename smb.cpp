@@ -23,7 +23,7 @@ int main(int argc, char ** argv) {
 	WSADATA wsaData;
 
 	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-
+        /* need to implement memset(packet_recv, 0, 512) and != (however much) * "\x00" on printf call*/
 	unsigned char packet_recv_1[512];
 	unsigned char packet_recv_2[512];
 	unsigned char packet_recv_3_sessionID[512];
