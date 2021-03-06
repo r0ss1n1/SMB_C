@@ -23,12 +23,17 @@ int main(int argc, char ** argv) {
 	WSADATA wsaData;
 
 	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-        /* need to implement memset(packet_recv, 0, 512) and != (however much) * "\x00" on printf call*/
+
 	unsigned char packet_recv_1[512];
 	unsigned char packet_recv_2[512];
 	unsigned char packet_recv_3_sessionID[512];
 	unsigned char packet_recv_4[512];
 	unsigned char packet_recv_5[512];
+	memset(packet_recv_1, 0, 512);
+	memset(packet_recv_2, 0, 512);
+	memset(packet_recv_3_sessionID, 0, 512);
+	memset(packet_recv_4, 0, 512);
+	memset(packet_recv_5, 0, 512);
 	/* packet_1 (73 bytes), packet_2 (178 bytes), packet_3 (225 bytes), packet_4 (213 bytes), packet_5 (122 bytes) */
 	unsigned char packet_1[] = "\x00\x00\x00\x45\xff\x53\x4d\x42\x72\x00\x00\x00\x00\x18\x53\xc8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xfe\x00\x00\x00\x00\x00\x22\x00\x02\x4e\x54\x20\x4c\x4d\x20\x30\x2e\x31\x32\x00\x02\x53\x4d\x42\x20\x32\x2e\x30\x30\x32\x00\x02\x53\x4d\x42\x20\x32\x2e\x3f\x3f\x3f\x00";
 	unsigned char packet_2[] = "\x00\x00\x00\xae\xfe\x53\x4d\x42\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x24\x00\x05\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x4e\x36\x0c\x5c\x33\x00\xeb\x11\xab\x4e\x00\x22\x19\xa2\xc3\xe0\x70\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02\x00\x03\x02\x03\x11\x03\x00\x00\x01\x00\x26\x00\x00\x00\x00\x00\x01\x00\x20\x00\x01\x00\x73\x14\x06\x5d\xc1\xa5\x87\x3b\xcc\xe0\x0e\x88\xef\x89\x80\x26\xb9\x85\xa9\x42\xf9\x0e\x07\xbc\xf0\x9e\xf5\x76\x1e\xb5\xe0\xcd\x00\x00\x02\x00\x06\x00\x00\x00\x00\x00\x02\x00\x02\x00\x01\x00";
@@ -56,14 +61,56 @@ int main(int argc, char ** argv) {
 	}
 	Sleep(3000);
 	result = send(SMB_CONNECTION, (char *) packet_1, 73, 0);
+	printf("\n\n");
 	printf("sent %ld bytes\n", result);
 	Sleep(3000);
 	Sleep(1000);
 	result = recv(SMB_CONNECTION, (char *) packet_recv_1, 512, 0);
+	printf("\n\n");
 	printf("********************\tPACKET 1 RECV\t********************\n");
 	for(unsigned int i = 0; i <= 512; ++i) {
 		printf("%x\t", packet_recv_1[i]);
 	}
+	printf("\n\n");
+	printf("********************\tPACKET 2\t********************\n");
+	for(unsigned int i = 0; i <= 177; ++i) {
+		printf("%x\t", packet_2[i]);
+	}
+	result = send(SMB_CONNECTION, (char *) packet_2, 178, 0);
+	Sleep(1000);
+	result = recv(SMB_CONNECTION, (char *) packet_recv_2, 512, 0);
+	printf("\n\n");
+	printf("********************\tPACKET 2 RECV\t********************\n");
+	for(unsigned int i = 0; i <= 512; ++i) {
+		printf("%x\t", packet_recv_2[i]);
+	}
+	Sleep(1000);
+	printf("\n\n");
+	printf("********************\tPACKET 3\t********************\n");
+	for(unsigned int i = 0; i <= 254; ++i) {
+		printf("%x\t", packet_3[i]);
+	}
+	result = send(SMB_CONNECTION, (char *) packet_3, 225, 0);
+	Sleep(1000);
+	result = recv(SMB_CONNECTION, (char *) packet_recv_3_sessionID, 512, 0);
+	printf("\n\n");
+	printf("********************\tPACKET 3 RECV\t********************\n");
+	for(unsigned int i = 0; i <= 512; ++i) {
+		printf("%x\t", packet_recv_3_sessionID[i]);
+	}
+	unsigned char session_ID[8];
+	int k = 0;
+	for(unsigned int j = 44; j <= 52; ++j) {
+		session_ID[k] = packet_recv_3_sessionID[j];
+		++k;
+	}
+	Sleep(1000);
+	printf("\n\n");
+	printf("SESSION ID: ");
+	for(unsigned int p = 0; p <= 7; ++p) {
+		printf("%x", session_ID[p]);
+	}
+	printf("\n\n");
 	closesocket(SMB_CONNECTION);
 	return 0;
 }
